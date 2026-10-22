@@ -1,18 +1,36 @@
-"""Kit entry point. TODO: align the method names/signatures with the kit's MODULE_GUIDE.md and DATA_CONTRACT.md.
-core.assess_case holds all logic and is independent of the kit."""
+"""Kit entry point: participant_module.adapter:AssessmentModule
+Signatures taken from participant_example/adapter.py of kit 0.5.0:
+  load(config, asset_root) ; assess(case, context) -> dict ; reset_case() ; close()
+All logic lives in core.assess_case."""
 import os
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
+from collections.abc import Mapping
+from pathlib import Path
+from typing import Any
 from .core import assess_case, load_model
 
+
 class AssessmentModule:
-    def load(self, checklist=None, settings=None, asset_root=None, **kw):
-        self.checklist = [{"criterion_id": c["criterion_id"], "description": c["description"]} for c in (checklist or [])]
-        self.settings = settings or {}
-        self.model = load_model(os.path.join(asset_root, "trl_ridge.json") if asset_root else None)
+    def __init__(self) -> None:
+        self._checklist = []
+        self._settings = {}
+        self._model = None
 
-    def assess(self, case, context=None):
-        rem = context.remaining_ms if context is not None else (lambda: 170_000)
-        return assess_case(case, self.checklist, self.model, rem, self.settings)
+    def load(self, config: Mapping[str, Any], asset_root: Path) -> None:
+        # Criterion IDs/descriptions come from the checklist the server passes in; never hard-coded.
+        self._checklist = [{"criterion_id": c["criterion_id"], "description": c["description"]}
+                           for c in config["checklist"]["criteria"]]
+        self._settings = dict(config.get("module", {}).get("settings", {}) or {})
+        try:
+            self._model = load_model(Path(asset_root) / "trl_ridge.json")
+        except Exception:
+            self._model = None  # no model -> cases abstain instead of failing
 
-    def reset_case(self): pass
-    def close(self): pass
+    def assess(self, case: Mapping[str, Any], context: Any) -> dict[str, Any]:
+        return assess_case(dict(case), self._checklist, self._model, context.remaining_ms, self._settings)
+
+    def reset_case(self) -> None:
+        pass
+
+    def close(self) -> None:
+        pass

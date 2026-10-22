@@ -19,7 +19,8 @@ def assess_case(case, checklist, model, remaining_ms, settings=None):
     k_pages = settings.get("evidence_pages", 3); min_score = settings.get("min_score", 0.12)
     res = {"schema_version": case.get("schema_version"), "checklist_version": case.get("checklist_version"),
            "case_id": case.get("case_id"), "assessment_target": case.get("assessment_target"),
-           "criterion_status": {}, "evidence_reference": {}, "missing_evidence": {}}
+           "criterion_status": {}, "evidence_reference": {}, "missing_evidence": {},
+           "predicted_trl": None, "abstention_reason": None, "error_code": None}
     try:
         t_end = time.monotonic() + max(0, remaining_ms() - SAFETY_MS) / 1000.0
         docs, all_pages = [], []
