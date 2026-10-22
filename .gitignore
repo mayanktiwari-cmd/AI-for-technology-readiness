@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data & large files
+*.pdf
+*.xlsx
+*.csv
+*.zip
+apctt-participant-kit-*/
+apctt-participant-kit-*.zip
+
+# Assets (generated)
+apctt_trl/assets/
+
+# Logs
+*.log
